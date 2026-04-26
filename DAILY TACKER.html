@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IIT Journey Vault</title>
+    <style>
+        :root { --bg: #05070a; --card: #111827; --primary: #8b5cf6; --secondary: #ec4899; --text: #f3f4f6; }
+        body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', sans-serif; padding: 20px; display: flex; flex-direction: column; align-items: center; }
+        .app-container { max-width: 700px; width: 100%; background: var(--card); border-radius: 20px; padding: 30px; border: 1px solid #1f2937; box-shadow: 0 10px 50px rgba(0,0,0,0.7); }
+        .journey-header { text-align: center; margin-bottom: 25px; border-bottom: 2px solid var(--primary); padding-bottom: 10px; position: relative; }
+        .header-btns { position: absolute; right: 0; top: 0; display: flex; gap: 5px; }
+        .refresh-btn { background: #374151; color: white; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer; font-size: 0.7rem; }
+        .reset-btn { background: #ef4444; color: white; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer; font-size: 0.7rem; }
+        .input-group { background: #1f2937; padding: 15px; border-radius: 12px; margin-bottom: 15px; }
+        label { font-weight: 600; color: #9ca3af; display: block; margin-bottom: 10px; }
+        select, input, textarea { width: 100%; padding: 12px; background: #0b0f1a; border: 1px solid #374151; color: white; border-radius: 8px; margin-bottom: 10px; box-sizing: border-box;}
+        .subject-btn { padding: 10px 20px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; margin-right: 10px; background: #374151; color: white; transition: 0.3s; }
+        .subject-btn.active { background: var(--primary); box-shadow: 0 0 10px var(--primary); }
+        .hidden { display: none; }
+        .flex-row { display: flex; gap: 10px; }
+        .flex-row div { flex: 1; }
+        .dpp-box { background: #0f172a; padding: 15px; border-radius: 8px; border: 1px dashed var(--primary); margin-top: 10px; }
+        .btn-save { background: linear-gradient(to right, var(--primary), var(--secondary)); border: none; width: 100%; padding: 18px; border-radius: 10px; color: white; font-weight: bold; cursor: pointer; font-size: 1.2rem; margin-top: 10px; transition: 0.3s; }
+        .history-item { background: #1f2937; padding: 20px; border-radius: 10px; margin-top: 15px; border-left: 5px solid var(--secondary); line-height: 1.6; }
+        .date-tag { background: var(--primary); padding: 3px 10px; border-radius: 5px; font-size: 0.8rem; font-weight: bold; }
+        .sleep-tag { background: #334155; padding: 2px 8px; border-radius: 4px; font-size: 0.8rem; color: #cbd5e1; }
+        .effort-slider { width: 100%; accent-color: var(--secondary); cursor: pointer; }
+        hr { border: 0; border-top: 1px solid #374151; margin: 15px 0; }
+    </style>
+</head>
+<body>
+
+<div class="app-container">
+    <div class="journey-header">
+        <div class="header-btns">
+            <button class="refresh-btn" onclick="location.reload()">🔄 Refresh</button>
+            <button class="reset-btn" onclick="masterReset()">⚠️ Reset All</button>
+        </div>
+        <h1 id="mainTitle">Day 1 / IIT Journey</h1>
+        <input type="date" id="studyDate">
+    </div>
+
+    <div class="input-group">
+        <label>Sleep Schedule:</label>
+        <div class="flex-row">
+            <div>
+                <label style="font-size: 0.7rem;">I Woke Up At:</label>
+                <input type="time" id="wakeTime">
+            </div>
+            <div>
+                <label style="font-size: 0.7rem;">I Slept At (Last Night):</label>
+                <input type="time" id="sleepTime">
+            </div>
+        </div>
+    </div>
+
+    <div id="form-content">
+        <div class="input-group">
+            <label>Select Subjects Studied Today:</label>
+            <button class="subject-btn" id="btnMath" onclick="toggleSubject('Math')">Mathematics</button>
+            <button class="subject-btn" id="btnPhy" onclick="toggleSubject('Phy')">Physics</button>
+            <button class="subject-btn" id="btnChem" onclick="toggleSubject('Chem')">Chemistry</button>
+        </div>
+
+        <div id="mathFields" class="hidden input-group">
+            <label>📐 Mathematics (TK Sir)</label>
+            <textarea id="mathTeach" placeholder="What did TK Sir teach today?"></textarea>
+            <input type="number" id="mathHWTotal" placeholder="Total HW Questions">
+            <input type="number" id="mathHWDone" placeholder="Questions Completed">
+            <label><input type="checkbox" id="mathNotes"> Notes Written?</label>
+            <label><input type="checkbox" id="mathDPP" onchange="toggleDPP('math')"> DPP Attempted?</label>
+            <div id="mathDPPDetail" class="hidden dpp-box">
+                <input type="number" id="mathDPPCorrect" placeholder="Correct Answers">
+                <input type="number" id="mathDPPTotal" placeholder="Total DPP Questions">
+                <input type="text" id="mathDPPTime" placeholder="Time Taken">
+            </div>
+        </div>
+
+        <div id="phyFields" class="hidden input-group">
+            <label>🍎 Physics (Saleem Sir)</label>
+            <textarea id="phyTeach" placeholder="What did Saleem Sir teach today?"></textarea>
+            <input type="number" id="phyHWTotal" placeholder="Total HW Questions">
+            <input type="number" id="phyHWDone" placeholder="Questions Completed">
+            <label><input type="checkbox" id="phyNotes"> Notes Written?</label>
+            <label><input type="checkbox" id="phyDPP" onchange="toggleDPP('phy')"> DPP Attempted?</label>
+            <div id="phyDPPDetail" class="hidden dpp-box">
+                <input type="number" id="phyDPPCorrect" placeholder="Correct Answers">
+                <input type="number" id="phyDPPTotal" placeholder="Total DPP Questions">
+                <input type="text" id="phyDPPTime" placeholder="Time Taken">
+            </div>
+        </div>
+
+        <div id="chemFields" class="hidden input-group">
+            <label>🧪 Chemistry Type</label>
+            <select id="chemType" onchange="updateChemTeacher()">
+                <option value="">Select Branch...</option>
+                <option value="Physical">Physical (Faisal Sir)</option>
+                <option value="Inorganic">Inorganic (Om Pandey Sir)</option>
+                <option value="Organic">Organic (Ashutosh Gautam Sir)</option>
+            </select>
+            <div id="chemDetails" class="hidden">
+                <textarea id="chemTeach"></textarea>
+                <input type="number" id="chemHWTotal" placeholder="Total HW Questions">
+                <input type="number" id="chemHWDone" placeholder="Questions Completed">
+                <label><input type="checkbox" id="chemNotes"> Notes Written?</label>
+                <label><input type="checkbox" id="chemDPP" onchange="toggleDPP('chem')"> DPP Attempted?</label>
+                <div id="chemDPPDetail" class="hidden dpp-box">
+                    <input type="number" id="chemDPPCorrect" placeholder="Correct Answers">
+                    <input type="number" id="chemDPPTotal" placeholder="Total DPP Questions">
+                    <input type="text" id="chemDPPTime" placeholder="Time Taken">
+                </div>
+            </div>
+        </div>
+
+        <div class="input-group">
+            <label>Today's Effort Level: <span id="effortVal">5</span>/10</label>
+            <input type="range" id="effortRange" min="1" max="10" value="5" class="effort-slider" oninput="document.getElementById('effortVal').innerText = this.value">
+        </div>
+
+        <div class="input-group">
+            <label>Today's Note:</label>
+            <textarea id="dailyNote" placeholder="Write any takeaways..."></textarea>
+        </div>
+
+        <button class="btn-save" onclick="saveJourney()">LOCK THIS DAY'S PROGRESS</button>
+    </div>
+
+    <div id="history" style="margin-top: 40px; width: 100%;">
+        <h3>📜 Your Journey Timeline</h3>
+        <div id="historyList"></div>
+    </div>
+</div>
+
+<script>
+    let activeSubjects = { Math: false, Phy: false, Chem: false };
+    document.getElementById('studyDate').valueAsDate = new Date();
+
+    const quotes = ["Consistency is the key to AIR 1.", "Push yourself, Future IITian!", "Hard work beats talent."];
+
+    function masterReset() {
+        if(confirm("Delete ALL history?")) {
+            localStorage.removeItem('jee_vault_final');
+            location.reload();
+        }
+    }
+
+    function updateDayCounter() {
+        const history = JSON.parse(localStorage.getItem('jee_vault_final')) || [];
+        if (history.length === 0) return document.getElementById('mainTitle').innerText = "Day 1 / IIT Journey";
+        const dates = history.map(e => new Date(e.date).getTime());
+        const startDate = new Date(Math.min(...dates));
+        const diffDays = Math.ceil(Math.abs(new Date() - startDate) / (1000 * 60 * 60 * 24)) + 1;
+        document.getElementById('mainTitle').innerText = "Day " + diffDays + " / IIT Journey";
+    }
+
+    function toggleSubject(sub) {
+        activeSubjects[sub] = !activeSubjects[sub];
+        document.getElementById('btn' + sub).classList.toggle('active');
+        document.getElementById(sub.toLowerCase() + 'Fields').classList.toggle('hidden');
+    }
+
+    function toggleDPP(sub) {
+        const isChecked = document.getElementById(sub + 'DPP').checked;
+        document.getElementById(sub + 'DPPDetail').classList.toggle('hidden', !isChecked);
+    }
+
+    function updateChemTeacher() {
+        const type = document.getElementById('chemType').value;
+        const details = document.getElementById('chemDetails');
+        const teachBox = document.getElementById('chemTeach');
+        details.classList.remove('hidden');
+        if(type === "Physical") teachBox.placeholder = "Faisal Sir taught...";
+        else if(type === "Inorganic") teachBox.placeholder = "Om Pandey Sir taught...";
+        else if(type === "Organic") teachBox.placeholder = "Ashutosh Gautam Sir taught...";
+    }
+
+    function saveJourney() {
+        const date = document.getElementById('studyDate').value;
+        let history = JSON.parse(localStorage.getItem('jee_vault_final')) || [];
+        if(history.find(e => e.date === date)) return alert("Day already locked!");
+
+        const log = {
+            date: date,
+            wake: document.getElementById('wakeTime').value,
+            sleep: document.getElementById('sleepTime').value,
+            effort: document.getElementById('effortRange').value,
+            dailyNote: document.getElementById('dailyNote').value,
+            math: activeSubjects.Math ? getSubData('math') : null,
+            phy: activeSubjects.Phy ? getSubData('phy') : null,
+            chem: activeSubjects.Chem ? { ...getSubData('chem'), type: document.getElementById('chemType').value } : null
+        };
+
+        history.push(log);
+        localStorage.setItem('jee_vault_final', JSON.stringify(history));
+        alert("Thank you Future IITian!\n\n\"" + quotes[Math.floor(Math.random() * quotes.length)] + "\"");
+        location.reload();
+    }
+
+    function getSubData(id) {
+        return {
+            teach: document.getElementById(id + 'Teach').value,
+            hw: `${document.getElementById(id + 'HWDone').value}/${document.getElementById(id + 'HWTotal').value}`,
+            notes: document.getElementById(id + 'Notes').checked,
+            dpp: document.getElementById(id + 'DPP').checked ? {
+                score: `${document.getElementById(id + 'DPPCorrect').value}/${document.getElementById(id + 'DPPTotal').value}`,
+                time: document.getElementById(id + 'DPPTime').value
+            } : null
+        };
+    }
+
+    function renderHistory() {
+        const list = document.getElementById('historyList');
+        const history = JSON.parse(localStorage.getItem('jee_vault_final')) || [];
+        history.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+        list.innerHTML = history.map(e => `
+            <div class="history-item">
+                <span class="date-tag">${new Date(e.date).toDateString()}</span> 
+                <span class="sleep-tag">🌙 Slept: ${e.sleep || '--'} | ☀️ Woke: ${e.wake || '--'}</span>
+                <p><strong>Effort:</strong> ${e.effort}/10</p>
+                ${e.math ? `<div><strong>📐 Math:</strong> ${e.math.teach}</div>` : ''}
+                ${e.phy ? `<div><strong>🍎 Physics:</strong> ${e.phy.teach}</div>` : ''}
+                ${e.chem ? `<div><strong>🧪 ${e.chem.type}:</strong> ${e.chem.teach}</div>` : ''}
+                <hr><p><i>Note: ${e.dailyNote || 'None'}</i></p>
+            </div>
+        `).join('');
+    }
+    renderHistory(); updateDayCounter();
+</script>
+</body>
+</html>
